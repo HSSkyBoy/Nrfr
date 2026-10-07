@@ -5,16 +5,19 @@ import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.nrfr.R
 
@@ -26,26 +29,15 @@ fun AboutScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                            modifier = Modifier.size(48.dp),
-                            contentDescription = "App Icon",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("关于")
-                    }
-                },
+                title = { Text("关于", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "返回")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
         }
     ) { innerPadding ->
@@ -53,124 +45,153 @@ fun AboutScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // 应用头部标识
             Column(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-                    .weight(1f, fill = false),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 应用信息
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            "功能介绍",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            "• 修改 SIM 卡的国家码配置，可用于解除部分应用的地区限制\n" +
-                                    "• 帮助使用海外 SIM 卡时获得更好的本地化体验\n" +
-                                    "• 解决部分应用识别 SIM 卡地区错误的问题\n" +
-                                    "• 无需 Root 权限，无需修改系统文件，安全且可随时还原\n" +
-                                    "• 支持 Android 8 及以上系统版本\n" +
-                                    "• 支持双卡设备，可分别配置不同国家码",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
-
-                // 作者信息
-                Text(
-                    "作者信息",
-                    style = MaterialTheme.typography.titleMedium
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    modifier = Modifier.size(64.dp),
+                    contentDescription = "App Icon",
+                    tint = MaterialTheme.colorScheme.primary
                 )
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("作者: Antkites")
-                        Text(
-                            "GitHub: Ackites",
-                            modifier = Modifier.clickable {
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Ackites"))
-                                )
-                            },
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            "X (Twitter): @actkites",
-                            modifier = Modifier.clickable {
-                                context.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("https://x.com/intent/follow?screen_name=actkites")
-                                    )
-                                )
-                            },
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
-
-                // 开源信息
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "开源信息",
-                    style = MaterialTheme.typography.titleMedium
+                    text = "Nrfr",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
                 )
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            "本项目已在 GitHub 开源",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Text(
-                            "访问项目主页",
-                            color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    context.startActivity(
-                                        Intent(
-                                            Intent.ACTION_VIEW,
-                                            Uri.parse("https://github.com/Ackites/Nrfr")
-                                        )
-                                    )
-                                }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // 版权信息
                 Text(
-                    "© 2024 Antkites. All rights reserved.",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = "免 Root SIM 卡国家码修改工具",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
+            // 功能介绍
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = "功能特性",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "• 修改 SIM 卡国家码配置，解除 TikTok、LINE 等应用的区域限制\n" +
+                                "• 优化海外 SIM 卡在本地的识别与运营商配置\n" +
+                                "• 全程基于系统级 API 覆盖，不修改物理 SIM 卡，随时可一键还原\n" +
+                                "• 支持双卡独立识别与分别配置\n" +
+                                "• 针对 Android 16/17 (API 36+) 现代架构深度适配",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            // 特权服务
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "特权服务支持",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "推荐使用适配 Android 16/17 的 Shizuku 维护分支，具备 16KB Page Size 兼容性与无线 ADB 守护进程。",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Button(
+                        onClick = {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/HSSkyBoy/Shizuku"))
+                            )
+                        },
+                        modifier = Modifier.padding(top = 4.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text("访问 HSSkyBoy/Shizuku")
+                    }
+                }
+            }
+
+            // 开源与许可
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = "项目与开源协议",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "本项目采用 Apache-2.0 许可证开源。",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                context.startActivity(
+                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/HSSkyBoy/Nrfr"))
+                                )
+                            }
+                            .padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "GitHub 项目仓库",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

@@ -1,26 +1,41 @@
 package com.github.nrfr.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.nrfr.R
 import com.github.nrfr.data.CountryPresets
 import com.github.nrfr.data.PresetCarriers
 import com.github.nrfr.manager.CarrierConfigManager
 import com.github.nrfr.model.SimCardInfo
+import com.github.nrfr.ui.theme.OnSuccessGreenContainer
+import com.github.nrfr.ui.theme.SuccessGreenContainer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,7 +50,6 @@ fun MainScreen(onShowAbout: () -> Unit) {
     var isCustomCountryCode by remember { mutableStateOf(false) }
     var selectedCarrier by remember { mutableStateOf<PresetCarriers.CarrierPreset?>(null) }
     var customCarrierName by remember { mutableStateOf("") }
-    var isSimCardMenuExpanded by remember { mutableStateOf(false) }
     var isCountryCodeMenuExpanded by remember { mutableStateOf(false) }
     var isCarrierMenuExpanded by remember { mutableStateOf(false) }
     var refreshTrigger by remember { mutableStateOf(0) }
@@ -54,10 +68,13 @@ fun MainScreen(onShowAbout: () -> Unit) {
     // 获取实际的 SIM 卡信息
     val simCards = remember(context, refreshTrigger) { CarrierConfigManager.getSimCards(context) }
 
-    // 当 simCards 更新时，更新选中的 SIM 卡信息
-    LaunchedEffect(simCards, selectedSimCard) {
+    // 当 simCards 更新时，自动选择或刷新选中的卡
+    LaunchedEffect(simCards) {
         if (selectedSimCard != null) {
             selectedSimCard = simCards.find { it.slot == selectedSimCard?.slot }
+        }
+        if (selectedSimCard == null && simCards.isNotEmpty()) {
+            selectedSimCard = simCards.first()
         }
     }
 
@@ -72,19 +89,26 @@ fun MainScreen(onShowAbout: () -> Unit) {
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                            modifier = Modifier.size(48.dp),
+                            modifier = Modifier.size(36.dp),
                             contentDescription = "App Icon",
                             tint = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Nrfr")
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Nrfr",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = onShowAbout) {
                         Icon(Icons.Default.Info, contentDescription = "关于")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
         }
     ) { innerPadding ->
@@ -92,76 +116,104 @@ fun MainScreen(onShowAbout: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // SIM卡选择
+            // 1. SIM 卡选择器（卡片式分段选择）
+            Text(
+                text = "选择 SIM 卡",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+
             SimCardSelector(
                 simCards = simCards,
                 selectedSimCard = selectedSimCard,
-                isExpanded = isSimCardMenuExpanded,
-                onExpandedChange = { isSimCardMenuExpanded = it },
                 onSimCardSelected = { selectedSimCard = it }
             )
 
-            // 显示当前选中的 SIM 卡的配置信息
+            // 2. 当前选中卡槽生效状态卡片
             selectedSimCard?.let { simCard ->
                 CurrentConfigCard(simCard = simCard)
             }
 
-            // 国家码选择
-            CountryCodeSelector(
-                selectedCountryCode = selectedCountryCode,
-                isCustomCountryCode = isCustomCountryCode,
-                customCountryCode = customCountryCode,
-                isExpanded = isCountryCodeMenuExpanded,
-                onExpandedChange = { isCountryCodeMenuExpanded = it },
-                onCountryCodeSelected = { code ->
-                    selectedCountryCode = code
-                    isCustomCountryCode = false
-                },
-                onCustomSelected = {
-                    isCustomCountryCode = true
-                    selectedCountryCode = customCountryCode
-                }
-            )
+            // 3. 配置目标参数卡片
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Text(
+                        text = "目标运营商配置",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
-            // 自定义国家码输入框
-            if (isCustomCountryCode) {
-                CustomCountryCodeInput(
-                    value = customCountryCode,
-                    onValueChange = {
-                        if (it.length <= 2 && it.all { char -> char.isLetter() }) {
-                            customCountryCode = it.uppercase()
-                            selectedCountryCode = it.uppercase()
+                    // 国家码选择
+                    CountryCodeSelector(
+                        selectedCountryCode = selectedCountryCode,
+                        isCustomCountryCode = isCustomCountryCode,
+                        customCountryCode = customCountryCode,
+                        isExpanded = isCountryCodeMenuExpanded,
+                        onExpandedChange = { isCountryCodeMenuExpanded = it },
+                        onCountryCodeSelected = { code ->
+                            selectedCountryCode = code
+                            isCustomCountryCode = false
+                        },
+                        onCustomSelected = {
+                            isCustomCountryCode = true
+                            selectedCountryCode = customCountryCode
                         }
+                    )
+
+                    // 自定义国家码输入框
+                    if (isCustomCountryCode) {
+                        CustomCountryCodeInput(
+                            value = customCountryCode,
+                            onValueChange = {
+                                if (it.length <= 2 && it.all { char -> char.isLetter() }) {
+                                    customCountryCode = it.uppercase()
+                                    selectedCountryCode = it.uppercase()
+                                }
+                            }
+                        )
                     }
-                )
-            }
 
-            // 运营商选择
-            CarrierSelector(
-                selectedCarrier = selectedCarrier,
-                isExpanded = isCarrierMenuExpanded,
-                onExpandedChange = { isCarrierMenuExpanded = it },
-                onCarrierSelected = { carrier ->
-                    selectedCarrier = carrier
-                    customCarrierName = carrier.displayName
+                    // 运营商选择
+                    CarrierSelector(
+                        selectedCarrier = selectedCarrier,
+                        isExpanded = isCarrierMenuExpanded,
+                        onExpandedChange = { isCarrierMenuExpanded = it },
+                        onCarrierSelected = { carrier ->
+                            selectedCarrier = carrier
+                            customCarrierName = carrier.displayName
+                        }
+                    )
+
+                    // 自定义运营商名称输入框
+                    if (selectedCarrier?.name == "自定义") {
+                        CustomCarrierNameInput(
+                            value = customCarrierName,
+                            onValueChange = { customCarrierName = it }
+                        )
+                    }
                 }
-            )
-
-            // 自定义运营商名称输入框
-            if (selectedCarrier?.name == "自定义") {
-                CustomCarrierNameInput(
-                    value = customCarrierName,
-                    onValueChange = { customCarrierName = it }
-                )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(4.dp))
 
-            // 按钮行
+            // 4. 底部操作按钮
             ActionButtons(
                 selectedSimCard = selectedSimCard,
                 selectedCountryCode = selectedCountryCode,
@@ -169,9 +221,9 @@ fun MainScreen(onShowAbout: () -> Unit) {
                 customCountryCode = customCountryCode,
                 selectedCarrier = selectedCarrier,
                 customCarrierName = customCarrierName,
-                onReset = {
+                onReset = { simCard ->
                     try {
-                        val delayedRefresh = CarrierConfigManager.resetCarrierConfig(context, it.subId)
+                        val delayedRefresh = CarrierConfigManager.resetCarrierConfig(context, simCard.subId)
                         Toast.makeText(context, "设置已还原", Toast.LENGTH_SHORT).show()
                         refreshConfig(delayedRefresh)
                         selectedCountryCode = ""
@@ -206,64 +258,110 @@ fun MainScreen(onShowAbout: () -> Unit) {
                     }
                 }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SimCardSelector(
     simCards: List<SimCardInfo>,
     selectedSimCard: SimCardInfo?,
-    isExpanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
     onSimCardSelected: (SimCardInfo) -> Unit
 ) {
-    ExposedDropdownMenuBox(
-        expanded = isExpanded,
-        onExpandedChange = onExpandedChange
-    ) {
-        OutlinedTextField(
-            value = selectedSimCard?.let { "SIM ${it.slot} (${it.carrierName})" } ?: "",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("选择SIM卡") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor()
-        )
-        ExposedDropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { onExpandedChange(false) }
+    if (simCards.isEmpty()) {
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
+            )
         ) {
-            simCards.forEach { simCard ->
-                DropdownMenuItem(
-                    text = {
-                        Column {
-                            Text("SIM ${simCard.slot} (${simCard.carrierName})")
-                            if (simCard.currentConfig.isEmpty()) {
-                                Text(
-                                    "无覆盖配置",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            } else {
-                                simCard.currentConfig.forEach { (key, value) ->
-                                    Text(
-                                        "$key: $value",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                    },
-                    onClick = {
-                        onSimCardSelected(simCard)
-                        onExpandedChange(false)
-                    }
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
                 )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "未检测到活跃的 SIM 卡，请检查卡槽状态",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        return
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        simCards.forEach { simCard ->
+            val isSelected = selectedSimCard?.slot == simCard.slot
+            ElevatedCard(
+                onClick = { onSimCardSelected(simCard) },
+                modifier = Modifier.weight(1f),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = if (isSelected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainer
+                    }
+                ),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = if (isSelected) 3.dp else 1.dp
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${simCard.slot}",
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "SIM ${simCard.slot}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = simCard.carrierName.ifBlank { "卡槽 ${simCard.slot}" },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
             }
         }
     }
@@ -271,33 +369,73 @@ private fun SimCardSelector(
 
 @Composable
 private fun CurrentConfigCard(simCard: SimCardInfo) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+    val hasOverride = simCard.currentConfig.isNotEmpty()
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                "当前配置",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            if (simCard.currentConfig.isEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    "无覆盖配置",
+                    text = "当前卡槽生效状态",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (hasOverride) SuccessGreenContainer else MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        text = if (hasOverride) "✓ 已生效覆盖" else "系统默认配置",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (hasOverride) OnSuccessGreenContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
+
+            if (!hasOverride) {
+                Text(
+                    text = "当前 SIM 卡正使用系统原生运营商参数，尚未写入自定义国家码或覆盖配置。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
                 simCard.currentConfig.forEach { (key, value) ->
-                    Text(
-                        "$key: $value",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = key,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = value,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }
@@ -321,7 +459,7 @@ private fun CountryCodeSelector(
     ) {
         OutlinedTextField(
             value = when {
-                isCustomCountryCode -> "自定义"
+                isCustomCountryCode -> "自定义 (${customCountryCode.ifEmpty { "未输入" }})"
                 selectedCountryCode.isEmpty() -> ""
                 else -> CountryPresets.countries.find { it.code == selectedCountryCode }
                     ?.let { "${it.name} (${it.code})" }
@@ -329,8 +467,10 @@ private fun CountryCodeSelector(
             },
             onValueChange = {},
             readOnly = true,
-            label = { Text("选择国家码") },
+            label = { Text("国家码") },
+            placeholder = { Text("请选择目标国家") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor()
@@ -339,7 +479,6 @@ private fun CountryCodeSelector(
             expanded = isExpanded,
             onDismissRequest = { onExpandedChange(false) }
         ) {
-            // 预设国家码列表
             CountryPresets.countries.forEach { countryInfo ->
                 DropdownMenuItem(
                     text = { Text("${countryInfo.name} (${countryInfo.code})") },
@@ -349,9 +488,9 @@ private fun CountryCodeSelector(
                     }
                 )
             }
-            // 自定义选项
+            HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("自定义") },
+                text = { Text("自定义国家码...") },
                 onClick = {
                     onCustomSelected()
                     onExpandedChange(false)
@@ -361,7 +500,6 @@ private fun CountryCodeSelector(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CustomCountryCodeInput(
     value: String,
@@ -371,17 +509,24 @@ private fun CustomCountryCodeInput(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text("自定义国家码 (2位字母)") },
+        label = { Text("输入 2 位字母国家码") },
+        placeholder = { Text("如: JP、US、TW") },
+        trailingIcon = {
+            if (value.isNotEmpty()) {
+                IconButton(onClick = { onValueChange("") }) {
+                    Icon(Icons.Default.Clear, contentDescription = "清除")
+                }
+            }
+        },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
-            onDone = {
-                focusManager.clearFocus()
-            }
+            onDone = { focusManager.clearFocus() }
         ),
         singleLine = true,
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -402,8 +547,10 @@ private fun CarrierSelector(
             value = selectedCarrier?.name ?: "",
             onValueChange = {},
             readOnly = true,
-            label = { Text("选择运营商") },
+            label = { Text("运营商名称") },
+            placeholder = { Text("选择目标运营商（可选）") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor()
@@ -412,17 +559,17 @@ private fun CarrierSelector(
             expanded = isExpanded,
             onDismissRequest = { onExpandedChange(false) }
         ) {
-            // 分组显示运营商
             PresetCarriers.presets
                 .groupBy { it.region }
                 .forEach { (region, carriers) ->
                     if (region.isNotEmpty()) {
                         val regionName = CountryPresets.countries.find { it.code == region }?.name ?: region
                         Text(
-                            regionName,
+                            text = regionName,
                             style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            color = MaterialTheme.colorScheme.primary
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
                         )
                         carriers.forEach { carrier ->
                             DropdownMenuItem(
@@ -433,11 +580,10 @@ private fun CarrierSelector(
                                 }
                             )
                         }
-                        Divider(modifier = Modifier.padding(vertical = 4.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                     }
                 }
 
-            // 自定义选项
             PresetCarriers.presets
                 .filter { it.region.isEmpty() }
                 .forEach { carrier ->
@@ -453,7 +599,6 @@ private fun CarrierSelector(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CustomCarrierNameInput(
     value: String,
@@ -463,6 +608,16 @@ private fun CustomCarrierNameInput(
         value = value,
         onValueChange = onValueChange,
         label = { Text("自定义运营商名称") },
+        placeholder = { Text("输入要显示的运营商名称") },
+        trailingIcon = {
+            if (value.isNotEmpty()) {
+                IconButton(onClick = { onValueChange("") }) {
+                    Icon(Icons.Default.Clear, contentDescription = "清除")
+                }
+            }
+        },
+        shape = RoundedCornerShape(12.dp),
+        singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -480,28 +635,39 @@ private fun ActionButtons(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // 还原按钮
         OutlinedButton(
             onClick = { selectedSimCard?.let(onReset) },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp),
             enabled = selectedSimCard != null
         ) {
+            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text("还原设置")
         }
 
         // 保存按钮
+        val canSave = selectedSimCard != null && (
+            (if (isCustomCountryCode) customCountryCode.length == 2 else selectedCountryCode.isNotEmpty()) ||
+            (!customCarrierName.isNullOrEmpty() || selectedCarrier != null)
+        )
+
         Button(
             onClick = { selectedSimCard?.let(onSave) },
-            modifier = Modifier.weight(1f),
-            enabled = selectedSimCard != null && (
-                    (isCustomCountryCode && customCountryCode.length == 2) ||
-                            (!isCustomCountryCode && selectedCountryCode.isNotEmpty()) ||
-                            (selectedCarrier != null && (selectedCarrier.name != "自定义" || customCarrierName.isNotEmpty()))
-                    )
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            enabled = canSave
         ) {
-            Text("保存生效")
+            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("应用配置")
         }
     }
 }

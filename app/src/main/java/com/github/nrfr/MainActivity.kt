@@ -51,7 +51,14 @@ class MainActivity : ComponentActivity() {
                 } else if (isShizukuReady) {
                     MainScreen(onShowAbout = { showAbout = true })
                 } else {
-                    ShizukuNotReadyScreen()
+                    ShizukuNotReadyScreen(
+                        onCheckStatus = { checkShizukuStatus() },
+                        onRequestPermission = {
+                            if (Shizuku.getBinder() != null && Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                                Shizuku.requestPermission(0)
+                            }
+                        }
+                    )
                 }
             }
         }
