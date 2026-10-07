@@ -6,12 +6,13 @@ plugins {
 
 android {
     namespace = "com.github.nrfr"
-    compileSdk = 34
+    compileSdkVersion("android-37.0")
+    buildToolsVersion = "37.0.0"
 
     defaultConfig {
         applicationId = "com.github.nrfr"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 37
         versionCode = 3 //版本更新 +1
         versionName = "1.0.3" //同步更新版本号 rfr-client/app.go
 
@@ -22,6 +23,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
