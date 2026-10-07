@@ -96,9 +96,9 @@ Nrfr 通过调用 Android 系统级 API（CarrierConfigLoader）修改系统内�
 
 ## ⚠️ 注意事项
 
-- 需要安装并启用 Shizuku
+- 需要安装并启用 Shizuku（**强烈推荐使用适配高版本 Android 16/17 的 [HSSkyBoy/Shizuku](https://github.com/HSSkyBoy/Shizuku)**，针对 Android 16/17 (SDK 37) 优化，具备 16KB Page Size 与无线 ADB 看门狗稳定性）
 - 修改国家码可能会影响运营商服务，请谨慎操作
-- 部分设备可能不支持修改国家码
+- Android 16+ 建议使用临时覆盖（系统会限制非系统应用的持久化覆写），重启后如失效重新应用即可
 - 如需还原设置，请使用应用内的还原功能
 
 ## 🚀 快速开始
@@ -171,8 +171,7 @@ cd app
 
 ## 📝 依赖项
 
-- [Shizuku](https://shizuku.rikka.app/) - 用于提供特权服务
-- [ADB](https://developer.android.com/tools/adb) - Android 调试桥接
+- [Shizuku](https://github.com/HSSkyBoy/Shizuku) - 提供系统特权服务支持
 
 ## 🤝 贡献
 
@@ -191,30 +190,6 @@ cd app
 
 本工具仅供学习和研究使用。使用本工具修改系统设置可能会影响设备的正常使用，请自行承担风险。作者不对任何可能的损失负责。
 
-## 💖 支持
-
-如果你觉得这个项目有帮助：
-
-- 在 X 上关注 [@actkites](https://x.com/intent/follow?screen_name=actkites)
-- 给项目点个 Star ⭐
-- 分享给更多的人
-
 ## ⭐ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Ackites/Nrfr&type=Date)](https://star-history.com/#Ackites/Nrfr&Date)
-
-## 🙏 鸣谢
-
-- [Shizuku](https://shizuku.rikka.app/) - 感谢 Shizuku 提供的特权服务支持
-
-## 🚀 赞助商
-
-<div>
-  <p><strong>本项目 CDN 加速及安全防护由 Tencent EdgeOne 赞助</strong></p>
-  <a href="https://edgeone.ai/zh?from=github" target="_blank">
-    <img src="https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png" alt="Tencent EdgeOne" width="200">
-  </a>
-  <p><a href="https://edgeone.ai/zh?from=github" target="_blank">亚洲最佳CDN、边缘和安全解决方案 - Tencent EdgeOne</a></p>
-</div>
-
-[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")

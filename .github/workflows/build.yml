@@ -118,7 +118,7 @@ jobs:
       - name: Download Shizuku APK
         run: |
           mkdir -p nrfr-client/build/bin/resources
-          curl -L $(curl -s https://api.github.com/repos/RikkaApps/Shizuku/releases/latest | grep "browser_download_url.*apk" | cut -d '"' -f 4) -o nrfr-client/build/bin/resources/shizuku.apk
+          curl -L $(curl -s https://api.github.com/repos/HSSkyBoy/Shizuku/releases/latest | grep "browser_download_url.*apk" | cut -d '"' -f 4) -o nrfr-client/build/bin/resources/shizuku.apk
         shell: bash
 
       # 复制 Android APK
