@@ -7,9 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.github.nrfr.ui.theme.surfaceContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +49,7 @@ fun ShizukuNotReadyScreen(
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = MaterialTheme.surfaceContainer
                 ),
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
             ) {
@@ -68,7 +68,7 @@ fun ShizukuNotReadyScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Security,
+                            imageVector = Icons.Default.Info,
                             contentDescription = null,
                             modifier = Modifier.size(40.dp),
                             tint = MaterialTheme.colorScheme.primary
@@ -76,20 +76,20 @@ fun ShizukuNotReadyScreen(
                     }
 
                     Text(
-                        text = "需要 Shizuku 权限",
+                        text = "需要 Shizuku 權限",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
-                        text = "Nrfr 需要透过 Shizuku 系统特权服务来安全修改运营商配置。请确保 Shizuku 服务已启动并授予本应用访问权限。",
+                        text = "Nrfr 需要透過 Shizuku 系統特權服務來安全修改電信商配置。請確保 Shizuku 服務已啟動並授予本應用存取權限。",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    Divider(modifier = Modifier.padding(vertical = 4.dp))
 
                     // 操作按鈕 1：嘗試打開本機 Shizuku
                     Button(
@@ -110,7 +110,7 @@ fun ShizukuNotReadyScreen(
                     ) {
                         Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("打开 Shizuku 应用")
+                        Text("開啟 Shizuku 應用")
                     }
 
                     // 操作按鈕 2：請求授權 / 檢查狀態
@@ -123,7 +123,7 @@ fun ShizukuNotReadyScreen(
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("请求授权并刷新")
+                        Text("請求授權並重新整理")
                     }
 
                     // 下載推薦分支
@@ -136,10 +136,10 @@ fun ShizukuNotReadyScreen(
                             context.startActivity(browserIntent)
                         }
                     ) {
-                        Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "获取推荐版 Shizuku (适配 Android 16/17)",
+                            "取得推薦版 Shizuku (適配 Android 16/17)",
                             style = MaterialTheme.typography.labelMedium
                         )
                     }

@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -16,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+// 亮色配色方案
 private val LightColorScheme = lightColorScheme(
     primary = LightPrimary,
     onPrimary = LightOnPrimary,
@@ -31,15 +33,13 @@ private val LightColorScheme = lightColorScheme(
     onTertiaryContainer = LightOnTertiaryContainer,
     surface = LightSurface,
     surfaceVariant = LightSurfaceVariant,
-    surfaceContainer = LightSurfaceContainer,
-    surfaceContainerHigh = LightSurfaceContainerHigh,
-    surfaceContainerLow = LightSurfaceContainerLow,
     onSurface = LightOnSurface,
     onSurfaceVariant = LightOnSurfaceVariant,
     outline = LightOutline,
     outlineVariant = LightOutlineVariant
 )
 
+// 暗色配色方案
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
     onPrimary = DarkOnPrimary,
@@ -55,14 +55,17 @@ private val DarkColorScheme = darkColorScheme(
     onTertiaryContainer = DarkOnTertiaryContainer,
     surface = DarkSurface,
     surfaceVariant = DarkSurfaceVariant,
-    surfaceContainer = DarkSurfaceContainer,
-    surfaceContainerHigh = DarkSurfaceContainerHigh,
-    surfaceContainerLow = DarkSurfaceContainerLow,
     onSurface = DarkOnSurface,
     onSurfaceVariant = DarkOnSurfaceVariant,
     outline = DarkOutline,
     outlineVariant = DarkOutlineVariant
 )
+
+// 兼容低版本 Compose Material3 的 SurfaceContainer 擴充屬性
+val MaterialTheme.surfaceContainer: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = if (isSystemInDarkTheme()) DarkSurfaceContainer else LightSurfaceContainer
 
 @Composable
 fun NrfrTheme(

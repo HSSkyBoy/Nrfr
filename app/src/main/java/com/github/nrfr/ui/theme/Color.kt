@@ -2,7 +2,7 @@ package com.github.nrfr.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light Colors
+// 亮色主題色彩定義
 val LightPrimary = Color(0xFF1F4F8B)
 val LightOnPrimary = Color.White
 val LightPrimaryContainer = Color(0xFFD6E3FF)
@@ -25,7 +25,7 @@ val LightOnSurfaceVariant = Color(0xFF434A56)
 val LightOutline = Color(0xFF737A87)
 val LightOutlineVariant = Color(0xFFC3C8D4)
 
-// Dark Colors
+// 暗色主題色彩定義
 val DarkPrimary = Color(0xFFA9C7FF)
 val DarkOnPrimary = Color(0xFF003061)
 val DarkPrimaryContainer = Color(0xFF004787)
@@ -48,7 +48,7 @@ val DarkOnSurfaceVariant = Color(0xFFC3C8D4)
 val DarkOutline = Color(0xFF8D94A1)
 val DarkOutlineVariant = Color(0xFF434A56)
 
-// Functional Colors
+// 業務狀態色彩（成功覆蓋與徽章）
 val SuccessGreen = Color(0xFF2E7D32)
 val SuccessGreenContainer = Color(0xFFD4EDDA)
 val OnSuccessGreenContainer = Color(0xFF155724)

@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Nrfr</string>
+    <string name="back">返回</string>
+    <string name="about_title">關於</string>
+    <string name="about_app_desc">免 Root SIM 卡國家碼修改工具</string>
+    <string name="about_features_title">功能特性</string>
+    <string name="about_features_content">• 修改 SIM 卡國家碼配置，解除 TikTok、LINE 等應用的區域限制\n• 優化海外 SIM 卡在本地的識別與電信商配置\n• 全程基於系統級 API 覆蓋，不修改實體 SIM 卡，隨時可一鍵還原\n• 支援雙卡獨立識別與分別配置\n• 針對 Android 16/17 (API 36+) 現代架構深度適配</string>
+    <string name="about_privileged_service_title">特權服務支援</string>
+    <string name="about_privileged_service_content">推薦使用適配 Android 16/17 的 Shizuku 維護分支，具備 16KB Page Size 相容性與無線 ADB 看門狗。</string>
+    <string name="about_privileged_service_btn">訪問 HSSkyBoy/Shizuku</string>
+    <string name="about_license_title">專案與開源協議</string>
+    <string name="about_license_content">本專案採用 Apache-2.0 許可證開源。</string>
+    <string name="about_github_repo">GitHub 專案倉庫</string>
 </resources>
