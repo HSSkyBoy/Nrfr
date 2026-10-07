@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         Shizuku.addRequestPermissionResultListener { _, grantResult ->
             isShizukuReady = grantResult == PackageManager.PERMISSION_GRANTED
             if (!isShizukuReady) {
-                Toast.makeText(this, "需要 Shizuku 权限才能运行", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_shizuku_permission_required), Toast.LENGTH_LONG).show()
             }
         }
 
@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
 
     private fun checkShizukuStatus() {
         isShizukuReady = if (Shizuku.getBinder() == null) {
-            Toast.makeText(this, "请先安装并启用 Shizuku", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_shizuku_not_installed), Toast.LENGTH_LONG).show()
             false
         } else {
             val hasPermission = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED

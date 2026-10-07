@@ -18,6 +18,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.github.nrfr.R
 import com.github.nrfr.ui.theme.surfaceContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +33,7 @@ fun ShizukuNotReadyScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Nrfr", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -76,14 +78,14 @@ fun ShizukuNotReadyScreen(
                     }
 
                     Text(
-                        text = "需要 Shizuku 權限",
+                        text = stringResource(R.string.shizuku_permission_required_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
-                        text = "Nrfr 需要透過 Shizuku 系統特權服務來安全修改電信商配置。請確保 Shizuku 服務已啟動並授予本應用存取權限。",
+                        text = stringResource(R.string.shizuku_permission_required_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -110,7 +112,7 @@ fun ShizukuNotReadyScreen(
                     ) {
                         Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("開啟 Shizuku 應用")
+                        Text(stringResource(R.string.btn_open_shizuku))
                     }
 
                     // 操作按鈕 2：請求授權 / 檢查狀態
@@ -123,7 +125,7 @@ fun ShizukuNotReadyScreen(
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("請求授權並重新整理")
+                        Text(stringResource(R.string.btn_request_permission_refresh))
                     }
 
                     // 下載推薦分支
@@ -139,7 +141,7 @@ fun ShizukuNotReadyScreen(
                         Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "取得推薦版 Shizuku (適配 Android 16/17)",
+                            stringResource(R.string.btn_get_recommended_shizuku),
                             style = MaterialTheme.typography.labelMedium
                         )
                     }

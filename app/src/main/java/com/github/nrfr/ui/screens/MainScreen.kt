@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -78,6 +79,12 @@ fun MainScreen(onShowAbout: () -> Unit) {
         }
     }
 
+    val defaultSlotName = stringResource(R.string.sim_slot_default)
+    val toastSaved = stringResource(R.string.toast_config_saved)
+    val toastSaveFailed = stringResource(R.string.toast_save_failed)
+    val toastReset = stringResource(R.string.toast_config_reset)
+    val toastResetFailed = stringResource(R.string.toast_reset_failed)
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -90,12 +97,12 @@ fun MainScreen(onShowAbout: () -> Unit) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launcher_foreground),
                             modifier = Modifier.size(36.dp),
-                            contentDescription = "App Icon",
+                            contentDescription = stringResource(R.string.app_icon),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Nrfr",
+                            text = stringResource(R.string.app_name),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleLarge
                         )
@@ -103,7 +110,7 @@ fun MainScreen(onShowAbout: () -> Unit) {
                 },
                 actions = {
                     IconButton(onClick = onShowAbout) {
-                        Icon(Icons.Default.Info, contentDescription = "關於")
+                        Icon(Icons.Default.Info, contentDescription = stringResource(R.string.about_title))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -122,7 +129,7 @@ fun MainScreen(onShowAbout: () -> Unit) {
         ) {
             // 1. SIM 卡選擇器（卡片式分段選擇）
             Text(
-                text = "選擇 SIM 卡",
+                text = stringResource(R.string.select_sim_card),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold
@@ -154,7 +161,7 @@ fun MainScreen(onShowAbout: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Text(
-                        text = "目標電信商配置",
+                        text = stringResource(R.string.target_config_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -224,13 +231,13 @@ fun MainScreen(onShowAbout: () -> Unit) {
                 onReset = { simCard ->
                     try {
                         val delayedRefresh = CarrierConfigManager.resetCarrierConfig(context, simCard.subId)
-                        Toast.makeText(context, "設定已還原", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, toastReset as CharSequence, Toast.LENGTH_SHORT).show()
                         refreshConfig(delayedRefresh)
                         selectedCountryCode = ""
                         selectedCarrier = null
                         customCarrierName = ""
                     } catch (e: Exception) {
-                        Toast.makeText(context, "還原失敗: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, String.format(toastResetFailed, e.message ?: "") as CharSequence, Toast.LENGTH_SHORT).show()
                     }
                 },
                 onSave = { simCard ->
@@ -251,10 +258,10 @@ fun MainScreen(onShowAbout: () -> Unit) {
                             countryCode,
                             carrierName
                         )
-                        Toast.makeText(context, "設定已儲存", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, toastSaved as CharSequence, Toast.LENGTH_SHORT).show()
                         refreshConfig(delayedRefresh)
                     } catch (e: Exception) {
-                        Toast.makeText(context, "儲存失敗: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, String.format(toastSaveFailed, e.message ?: "") as CharSequence, Toast.LENGTH_SHORT).show()
                     }
                 }
             )
@@ -289,7 +296,7 @@ private fun SimCardSelector(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "未檢測到活躍的 SIM 卡，請檢查卡槽狀態",
+                    text = stringResource(R.string.no_sim_detected),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -347,13 +354,13 @@ private fun SimCardSelector(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "SIM ${simCard.slot}",
+                            text = stringResource(R.string.sim_slot_title, simCard.slot),
                             style = MaterialTheme.typography.labelSmall,
                             color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
                             else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = simCard.carrierName.ifBlank { "卡槽 ${simCard.slot}" },
+                            text = simCard.carrierName.ifBlank { stringResource(R.string.sim_slot_default, simCard.slot) },
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
@@ -391,7 +398,7 @@ private fun CurrentConfigCard(simCard: SimCardInfo) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "當前卡槽生效狀態",
+                    text = stringResource(R.string.current_status_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -401,7 +408,7 @@ private fun CurrentConfigCard(simCard: SimCardInfo) {
                     color = if (hasOverride) SuccessGreenContainer else MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Text(
-                        text = if (hasOverride) "✓ 已生效覆蓋" else "系統預設配置",
+                        text = if (hasOverride) stringResource(R.string.status_override_active) else stringResource(R.string.status_system_default),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
@@ -414,7 +421,7 @@ private fun CurrentConfigCard(simCard: SimCardInfo) {
 
             if (!hasOverride) {
                 Text(
-                    text = "當前 SIM 卡正使用系統原生電信商參數，尚未寫入自定義國家碼或覆蓋配置。",
+                    text = stringResource(R.string.desc_system_default),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -460,7 +467,7 @@ private fun CountryCodeSelector(
     ) {
         OutlinedTextField(
             value = when {
-                isCustomCountryCode -> "自定義 (${customCountryCode.ifEmpty { "未輸入" }})"
+                isCustomCountryCode -> stringResource(R.string.custom_country_code_format, customCountryCode.ifEmpty { stringResource(R.string.custom_not_entered) })
                 selectedCountryCode.isEmpty() -> ""
                 else -> CountryPresets.countries.find { it.code == selectedCountryCode }
                     ?.let { "${it.name} (${it.code})" }
@@ -468,8 +475,8 @@ private fun CountryCodeSelector(
             },
             onValueChange = {},
             readOnly = true,
-            label = { Text("國家碼") },
-            placeholder = { Text("請選擇目標國家") },
+            label = { Text(stringResource(R.string.country_code_label)) },
+            placeholder = { Text(stringResource(R.string.country_code_placeholder)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
@@ -491,7 +498,7 @@ private fun CountryCodeSelector(
             }
             Divider()
             DropdownMenuItem(
-                text = { Text("自定義國家碼...") },
+                text = { Text(stringResource(R.string.custom_country_code_menu)) },
                 onClick = {
                     onCustomSelected()
                     onExpandedChange(false)
@@ -510,12 +517,12 @@ private fun CustomCountryCodeInput(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text("輸入 2 位字母國家碼") },
-        placeholder = { Text("如: JP、US、TW") },
+        label = { Text(stringResource(R.string.input_country_code_label)) },
+        placeholder = { Text(stringResource(R.string.input_country_code_placeholder)) },
         trailingIcon = {
             if (value.isNotEmpty()) {
                 IconButton(onClick = { onValueChange("") }) {
-                    Icon(Icons.Default.Clear, contentDescription = "清除")
+                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
                 }
             }
         },
@@ -548,8 +555,8 @@ private fun CarrierSelector(
             value = selectedCarrier?.name ?: "",
             onValueChange = {},
             readOnly = true,
-            label = { Text("電信商名稱") },
-            placeholder = { Text("選擇目標電信商（可選）") },
+            label = { Text(stringResource(R.string.carrier_name_label)) },
+            placeholder = { Text(stringResource(R.string.carrier_name_placeholder)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
@@ -608,12 +615,12 @@ private fun CustomCarrierNameInput(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text("自定義電信商名稱") },
-        placeholder = { Text("輸入要顯示的電信商名稱") },
+        label = { Text(stringResource(R.string.input_carrier_name_label)) },
+        placeholder = { Text(stringResource(R.string.input_carrier_name_placeholder)) },
         trailingIcon = {
             if (value.isNotEmpty()) {
                 IconButton(onClick = { onValueChange("") }) {
-                    Icon(Icons.Default.Clear, contentDescription = "清除")
+                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
                 }
             }
         },
@@ -649,7 +656,7 @@ private fun ActionButtons(
         ) {
             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(6.dp))
-            Text("還原設定")
+            Text(stringResource(R.string.btn_reset_config))
         }
 
         // 儲存按鈕
@@ -668,7 +675,7 @@ private fun ActionButtons(
         ) {
             Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(6.dp))
-            Text("應用配置")
+            Text(stringResource(R.string.btn_apply_config))
         }
     }
 }

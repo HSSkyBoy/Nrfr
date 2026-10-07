@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">Nrfr</string>
+    <string name="back">返回</string>
+    <string name="app_icon">应用图标</string>
+    <string name="clear">清除</string>
+
+    <!-- MainActivity -->
+    <string name="toast_shizuku_not_installed">请先安装并启用 Shizuku</string>
+    <string name="toast_shizuku_permission_required">需要 Shizuku 权限才能运行</string>
+
+    <!-- ShizukuNotReadyScreen -->
+    <string name="shizuku_permission_required_title">需要 Shizuku 权限</string>
+    <string name="shizuku_permission_required_desc">Nrfr 需要通过 Shizuku 系统特权服务来安全修改运营商配置。请确保 Shizuku 服务已启动并授予本应用访问权限。</string>
+    <string name="btn_open_shizuku">打开 Shizuku 应用</string>
+    <string name="btn_request_permission_refresh">请求授权并刷新</string>
+    <string name="btn_get_recommended_shizuku">获取推荐版 Shizuku (适配 Android 16/17)</string>
+
+    <!-- MainScreen -->
+    <string name="select_sim_card">选择 SIM 卡</string>
+    <string name="sim_slot_title">SIM %1$d</string>
+    <string name="sim_slot_default">卡槽 %1$d</string>
+    <string name="no_sim_detected">未检测到有效 SIM 卡</string>
+
+    <string name="current_status_title">当前卡槽生效状态</string>
+    <string name="status_override_active">✓ 已生效覆盖</string>
+    <string name="status_system_default">系统默认配置</string>
+    <string name="desc_system_default">当前 SIM 卡正使用系统原生运营商参数，尚未写入自定义国家码或覆盖配置。</string>
+
+    <string name="target_config_title">目标运营商配置</string>
+    <string name="country_code_label">国家码</string>
+    <string name="country_code_placeholder">请选择目标国家</string>
+    <string name="custom_country_code_format">自定义 (%1$s)</string>
+    <string name="custom_not_entered">未输入</string>
+    <string name="custom_country_code_menu">自定义国家码…</string>
+    <string name="input_country_code_label">输入 2 位字母国家码</string>
+    <string name="input_country_code_placeholder">如: JP、US、TW</string>
+
+    <string name="carrier_name_label">运营商名称</string>
+    <string name="carrier_name_placeholder">选择目标运营商（可选）</string>
+    <string name="input_carrier_name_label">自定义运营商名称</string>
+    <string name="input_carrier_name_placeholder">输入要显示的运营商名称</string>
+
+    <string name="btn_reset_config">还原设置</string>
+    <string name="btn_apply_config">应用配置</string>
+    <string name="toast_config_saved">设置已保存</string>
+    <string name="toast_save_failed">保存失败: %1$s</string>
+    <string name="toast_config_reset">设置已还原</string>
+    <string name="toast_reset_failed">还原失败: %1$s</string>
+
+    <!-- AboutScreen -->
+    <string name="about_title">关于</string>
+    <string name="about_app_desc">免 Root SIM 卡国家码修改工具</string>
+    <string name="about_features_title">功能特性</string>
+    <string name="about_features_content">• 修改 SIM 卡国家码配置，解除 TikTok、LINE 等应用的区域限制\n• 优化海外 SIM 卡在本地的识别与运营商配置\n• 全程基于系统级 API 覆盖，不修改实体 SIM 卡，随时可一键还原\n• 支持双卡独立识别与分别配置\n• 针对 Android 16/17 (API 36+) 现代架构深度适配</string>
+    <string name="about_privileged_service_title">特权服务支持</string>
+    <string name="about_privileged_service_content">推荐使用适配 Android 16/17 的 Shizuku 维护分支，具备 16KB Page Size 兼容性与无线 ADB 看门狗。</string>
+    <string name="about_privileged_service_btn">访问 HSSkyBoy/Shizuku</string>
+    <string name="about_license_title">项目与开源协议</string>
+    <string name="about_license_content">本项目采用 Apache-2.0 许可证开源。</string>
+    <string name="about_github_repo">GitHub 项目仓库</string>
+</resources>

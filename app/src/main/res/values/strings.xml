@@ -1,14 +1,61 @@
 <resources>
     <string name="app_name">Nrfr</string>
-    <string name="back">返回</string>
-    <string name="about_title">關於</string>
-    <string name="about_app_desc">免 Root SIM 卡國家碼修改工具</string>
-    <string name="about_features_title">功能特性</string>
-    <string name="about_features_content">• 修改 SIM 卡國家碼配置，解除 TikTok、LINE 等應用的區域限制\n• 優化海外 SIM 卡在本地的識別與電信商配置\n• 全程基於系統級 API 覆蓋，不修改實體 SIM 卡，隨時可一鍵還原\n• 支援雙卡獨立識別與分別配置\n• 針對 Android 16/17 (API 36+) 現代架構深度適配</string>
-    <string name="about_privileged_service_title">特權服務支援</string>
-    <string name="about_privileged_service_content">推薦使用適配 Android 16/17 的 Shizuku 維護分支，具備 16KB Page Size 相容性與無線 ADB 看門狗。</string>
-    <string name="about_privileged_service_btn">訪問 HSSkyBoy/Shizuku</string>
-    <string name="about_license_title">專案與開源協議</string>
-    <string name="about_license_content">本專案採用 Apache-2.0 許可證開源。</string>
-    <string name="about_github_repo">GitHub 專案倉庫</string>
+    <string name="back">Back</string>
+    <string name="app_icon">App Icon</string>
+    <string name="clear">Clear</string>
+
+    <!-- MainActivity -->
+    <string name="toast_shizuku_not_installed">Please install and start Shizuku first</string>
+    <string name="toast_shizuku_permission_required">Shizuku permission is required to operate</string>
+
+    <!-- ShizukuNotReadyScreen -->
+    <string name="shizuku_permission_required_title">Shizuku Permission Required</string>
+    <string name="shizuku_permission_required_desc">Nrfr requires Shizuku privileged system service to safely modify carrier configurations. Please ensure Shizuku service is running and grant access to this app.</string>
+    <string name="btn_open_shizuku">Open Shizuku</string>
+    <string name="btn_request_permission_refresh">Request Permission &amp; Refresh</string>
+    <string name="btn_get_recommended_shizuku">Get recommended Shizuku (Android 16/17 compatible)</string>
+
+    <!-- MainScreen -->
+    <string name="select_sim_card">Select SIM Card</string>
+    <string name="sim_slot_title">SIM %1$d</string>
+    <string name="sim_slot_default">Slot %1$d</string>
+    <string name="no_sim_detected">No SIM card detected</string>
+
+    <string name="current_status_title">Active Configuration Status</string>
+    <string name="status_override_active">✓ Override Active</string>
+    <string name="status_system_default">System Default</string>
+    <string name="desc_system_default">This SIM card is using original carrier parameters. No override configuration applied.</string>
+
+    <string name="target_config_title">Target Carrier Configuration</string>
+    <string name="country_code_label">Country Code</string>
+    <string name="country_code_placeholder">Select target country</string>
+    <string name="custom_country_code_format">Custom (%1$s)</string>
+    <string name="custom_not_entered">Not entered</string>
+    <string name="custom_country_code_menu">Custom country code…</string>
+    <string name="input_country_code_label">Enter 2-letter country code</string>
+    <string name="input_country_code_placeholder">e.g. JP, US, TW</string>
+
+    <string name="carrier_name_label">Carrier Name</string>
+    <string name="carrier_name_placeholder">Select target carrier (Optional)</string>
+    <string name="input_carrier_name_label">Custom Carrier Name</string>
+    <string name="input_carrier_name_placeholder">Enter carrier display name</string>
+
+    <string name="btn_reset_config">Reset</string>
+    <string name="btn_apply_config">Apply</string>
+    <string name="toast_config_saved">Settings applied</string>
+    <string name="toast_save_failed">Failed to save: %1$s</string>
+    <string name="toast_config_reset">Settings reset to default</string>
+    <string name="toast_reset_failed">Failed to reset: %1$s</string>
+
+    <!-- AboutScreen -->
+    <string name="about_title">About</string>
+    <string name="about_app_desc">Rootless SIM Carrier Country Code Tool</string>
+    <string name="about_features_title">Features</string>
+    <string name="about_features_content">• Modify SIM carrier country codes to bypass region lock in apps like TikTok and LINE\n• Optimize local network identification for roaming or foreign SIM cards\n• Operates via system API override without modifying physical SIM cards, reversible anytime\n• Supports independent dual SIM detection and configuration\n• Deeply optimized for Android 16/17 (API 36+) modern architecture</string>
+    <string name="about_privileged_service_title">Privileged Service Support</string>
+    <string name="about_privileged_service_content">We recommend using the Shizuku maintenance fork adapted for Android 16/17, featuring 16KB Page Size compatibility and wireless ADB watchdog.</string>
+    <string name="about_privileged_service_btn">Visit HSSkyBoy/Shizuku</string>
+    <string name="about_license_title">Project &amp; License</string>
+    <string name="about_license_content">This project is licensed under Apache-2.0.</string>
+    <string name="about_github_repo">GitHub Repository</string>
 </resources>
