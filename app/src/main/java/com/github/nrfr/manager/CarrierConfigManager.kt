@@ -2,16 +2,22 @@ package com.github.nrfr.manager
 
 import android.content.Context
 import android.os.Build
+import android.os.IBinder
 import android.os.PersistableBundle
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionManager
-import android.telephony.TelephonyFrameworkInitializer
 import android.telephony.TelephonyManager
-import com.android.internal.telephony.ICarrierConfigLoader
 import com.github.nrfr.model.SimCardInfo
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.shizuku.ShizukuBinderWrapper
+import java.lang.reflect.InvocationTargetException
 
 object CarrierConfigManager {
+    init {
+        HiddenApiBypass.addHiddenApiExemptions("L")
+        HiddenApiBypass.addHiddenApiExemptions("I")
+    }
+
     fun getSimCards(context: Context): List<SimCardInfo> {
         val simCards = mutableListOf<SimCardInfo>()
 
@@ -69,11 +75,36 @@ object CarrierConfigManager {
      */
     private fun getSubIdForSlot(slotIndex: Int): Int? {
         val directSubId = runCatching {
-            SubscriptionManager.getSubId(slotIndex)
-                ?.firstOrNull { it != SubscriptionManager.INVALID_SUBSCRIPTION_ID }
+            // Android 29+ 推薦使用 SubscriptionManager.getSubscriptionId(slotIndex)
+            val subId = SubscriptionManager.getSubscriptionId(slotIndex)
+            if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                subId
+            } else {
+                null
+            }
+        }.getOrNull() ?: runCatching {
+            // 舊版反射支援 getSubId(Int): IntArray
+            val getSubIdMethod = SubscriptionManager::class.java.getMethod("getSubId", Int::class.javaPrimitiveType)
+            val ids = getSubIdMethod.invoke(null, slotIndex) as? IntArray
+            ids?.firstOrNull { it != SubscriptionManager.INVALID_SUBSCRIPTION_ID }
         }.getOrNull()
 
         return directSubId ?: PrivilegedCarrierConfigRunner.getSubIdForSlot(slotIndex)
+    }
+
+    private fun getCarrierConfigLoader(): Any? {
+        return try {
+            val serviceManagerClass = Class.forName("android.os.ServiceManager")
+            val getServiceMethod = serviceManagerClass.getMethod("getService", String::class.java)
+            val rawBinder = getServiceMethod.invoke(null, "carrier_config") as? IBinder
+                ?: return null
+            val wrappedBinder = ShizukuBinderWrapper(rawBinder)
+            val stubClass = Class.forName("com.android.internal.telephony.ICarrierConfigLoader\$Stub")
+            val asInterfaceMethod = stubClass.getMethod("asInterface", IBinder::class.java)
+            asInterfaceMethod.invoke(null, wrappedBinder)
+        } catch (_: Throwable) {
+            null
+        }
     }
 
     private inline fun getCurrentConfig(
@@ -84,24 +115,24 @@ object CarrierConfigManager {
 
         // 1. 優先透過系統 ICarrierConfigLoader 讀取（原生 API 極快）
         try {
-            val carrierConfigLoader = ICarrierConfigLoader.Stub.asInterface(
-                ShizukuBinderWrapper(
-                    TelephonyFrameworkInitializer
-                        .getTelephonyServiceManager()
-                        .carrierConfigServiceRegisterer
-                        .get()
+            val loader = getCarrierConfigLoader()
+            if (loader != null) {
+                val method = loader.javaClass.getMethod(
+                    "getConfigForSubId",
+                    Int::class.javaPrimitiveType,
+                    String::class.java
                 )
-            )
-            val config = carrierConfigLoader.getConfigForSubId(subId, "com.github.nrfr")
-            if (config != null) {
-                config.getString(CarrierConfigManager.KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING)
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { result["国家码"] = it }
-
-                if (config.getBoolean(CarrierConfigManager.KEY_CARRIER_NAME_OVERRIDE_BOOL, false)) {
-                    config.getString(CarrierConfigManager.KEY_CARRIER_NAME_STRING)
+                val config = method.invoke(loader, subId, "com.github.nrfr") as? PersistableBundle
+                if (config != null) {
+                    config.getString(CarrierConfigManager.KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING)
                         ?.takeIf { it.isNotBlank() }
-                        ?.let { result["运营商名称"] = it }
+                        ?.let { result["国家码"] = it }
+
+                    if (config.getBoolean(CarrierConfigManager.KEY_CARRIER_NAME_OVERRIDE_BOOL, false)) {
+                        config.getString(CarrierConfigManager.KEY_CARRIER_NAME_STRING)
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { result["运营商名称"] = it }
+                    }
                 }
             }
         } catch (_: Exception) {
@@ -165,27 +196,29 @@ object CarrierConfigManager {
         subId: Int,
         bundle: PersistableBundle?
     ): Boolean {
-        val carrierConfigLoader = ICarrierConfigLoader.Stub.asInterface(
-            ShizukuBinderWrapper(
-                TelephonyFrameworkInitializer
-                    .getTelephonyServiceManager()
-                    .carrierConfigServiceRegisterer
-                    .get()
-            )
-        )
+        val loader = getCarrierConfigLoader()
+            ?: throw IllegalStateException("未能获取 carrier_config 服务代理")
+
         return try {
             // Android 16 (API 36) 的廠商 ROM 上僅接受臨時覆蓋 (persistent = false)
             val persistent = Build.VERSION.SDK_INT < 36
-            carrierConfigLoader.overrideConfig(subId, bundle, persistent)
+            val method = loader.javaClass.getMethod(
+                "overrideConfig",
+                Int::class.javaPrimitiveType,
+                PersistableBundle::class.java,
+                Boolean::class.javaPrimitiveType
+            )
+            method.invoke(loader, subId, bundle, persistent)
             false
-        } catch (e: SecurityException) {
-            // 當系統拒絕 Shell 直接呼叫時（如 realme UI 7.0 / ColorOS / HyperOS 等），
-            // 降級透過特權 Instrumentation 委派 Shell 權限寫入
-            if (e.message?.contains("cannot be invoked by shell") == true || Build.VERSION.SDK_INT >= 35) {
+        } catch (e: Throwable) {
+            val target = if (e is InvocationTargetException) e.targetException ?: e else e
+            // 当系统拒绝 Shell 直接呼叫时（如 realme UI 7.0 / ColorOS / HyperOS 等），
+            // 降级透过特权 Instrumentation 委派 Shell 权限写入
+            if (target is SecurityException && (target.message?.contains("cannot be invoked by shell") == true || Build.VERSION.SDK_INT >= 35)) {
                 PrivilegedCarrierConfigRunner.overrideConfig(context, subId, bundle)
                 true
             } else {
-                throw e
+                throw target
             }
         }
     }
